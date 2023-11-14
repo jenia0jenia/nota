@@ -4,3 +4,5 @@ omr
 pdf
 png
 xml
+*.log
+test.sh
