@@ -7,7 +7,7 @@ pdf=$basedir/pdf
 omr=$basedir/omr
 xml=$basedir/xml
 mid=$basedir/mid
-MAX_FILESIZE=$(expr 5 \* 1024 \* 1024)
+MAX_FILESIZE=$(expr 5 \* 1024 \* 1024) # 5Mb
 
 mkdir -p $pdf
 cd $basedir/nota
@@ -31,22 +31,29 @@ makeRecognition() {
 
     {
     if [ ! -z "$(ls -A $mid/$filename)" ]; then
-        echo "Skip $filename. $mid/$filename not empty!"
+        echo "Skip PROCESS $x. $mid/$filename not empty!"
         return 1
     fi
     }
 
-    echo "Start process..."
+    ##########################
+    echo "Starting PROCESS..."
 
-    echo pdftoppm $x "$png/$filename/$filename" -png
-    pdftoppm $nota/$x "$png/$filename/$filename" -png
+    {
+    if [ -f "$pdf/$x" ]; then
+        echo "Skip $x CONVERTING. $pdf/$x exists!"
+    else
+        echo pdftoppm $x "$png/$filename/$filename" -png
+        pdftoppm $nota/$x "$png/$filename/$filename" -png
 
-    echo convert "$png/$filename/*.png" "$pdf/$x"
-    convert "$png/$filename/*.png" "$pdf/$x"
+        echo convert "$png/$filename/*.png" "$pdf/$x"
+        convert "$png/$filename/*.png" "$pdf/$x"
+    fi
+    }
 
     cd $audiveris
-    echo $audiveris/gradlew run -PcmdLineArgs="-batch,-export,-output,$omr/$filename,--,$pdf/$x"
-    ./gradlew run -PcmdLineArgs="-batch,-export,-output,$omr/$filename,--,$pdf/$x"
+    echo $audiveris/gradlew run -PcmdLineArgs="-batch,-export,-option,org.audiveris.omr.text.Language.defaultSpecification=fra+eng+deu+rus,-output,$omr/$filename,--,$pdf/$x"
+    ./gradlew run -PcmdLineArgs="-batch,-export,-option,org.audiveris.omr.text.Language.defaultSpecification=fra+eng+deu+rus,-output,$omr/$filename,--,$pdf/$x"
 
     cd $omr/$filename
     for m in *.mxl; do
@@ -60,6 +67,7 @@ makeRecognition() {
     done
 
     cd $basedir/nota
+    
 }
 
 # Without argv
@@ -76,7 +84,7 @@ if [ $# -eq 0 ];
     for x in "$@";
     do
         makeRecognition $x
-        if [ $? -eq 1 ];
+        if [ $? -ne 0 ]; # if makeRecognition result == 1 then continue
         then
             continue
         fi

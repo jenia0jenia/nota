@@ -3,7 +3,7 @@
 
 ## Как делает
 1. Из pdf в png
-2. Из png в pdf (Иначе не разпознает)
+2. Из png в pdf (Иначе не разпознает, [https://github.com/Audiveris/audiveris/issues/280](https://github.com/Audiveris/audiveris/issues/280))
 3. Из pdf в mxl (сжатый musicxml)
 4. Из mxl в xml (разжатый musicxml)
 5. Из xml в mid (звуковой файл)
